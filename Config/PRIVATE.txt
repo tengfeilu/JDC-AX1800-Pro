@@ -1,9 +1,85 @@
-# 纯有线主路由的插件裁剪（CI 的 Config/PRIVATE.txt 扩展入口，在 GENERAL.txt 之后生效）
-# 依据：master-yun-yun/JDC-AX1800-Pro 的 Config/GENERAL.txt 默认往里塞了 php8 / 5 个主题 /
-# samba4 / docker / istore / verysync / sunpanel / nvme / 全部 USB-4G 驱动 …… 这是 179MB 的来源。
-# 主路由用不上，砍掉后产物通常落在 25~35MB（原厂 60MB 分区放得下）。
+# 亚瑟 RE-SS-01 纯有线主路由 插件配置 v2（生效顺序：GENERAL.txt -> Config/PRIVATE.txt -> CONFIG_USE_APK=n）
+# 已刷大分区，不再限制体积。lucky/bandix 源由 Scripts/PRIVATE.sh 添加。
 
-# ---------- 砍掉：Web/网盘/NAS 大件 ----------
+# 1 终端
+CONFIG_PACKAGE_luci-app-ttyd=y
+CONFIG_PACKAGE_ttyd=y
+# 2 微信推送
+CONFIG_PACKAGE_luci-app-wechatpush=y
+# 3 OpenClash（需 dnsmasq-full）
+CONFIG_PACKAGE_luci-app-openclash=y
+# 4 Lucky
+CONFIG_PACKAGE_lucky=y
+CONFIG_PACKAGE_luci-app-lucky=y
+CONFIG_PACKAGE_rpcd-mod-file=y
+# 5 带宽监控 nlbwmon
+CONFIG_PACKAGE_nlbwmon=y
+CONFIG_PACKAGE_luci-app-nlbwmon=y
+# 6 网络唤醒
+CONFIG_PACKAGE_luci-app-wolultra=y
+# 7 frp 客户端
+CONFIG_PACKAGE_frpc=y
+CONFIG_PACKAGE_luci-app-frpc=y
+# 8 KMS 服务器
+CONFIG_PACKAGE_vlmcsd=y
+CONFIG_PACKAGE_luci-app-vlmcsd=y
+# 9 EasyTier + ZeroTier（组网二选一启用）+ TUN 依赖
+CONFIG_PACKAGE_easytier=y
+CONFIG_PACKAGE_luci-app-easytier=y
+CONFIG_PACKAGE_zerotier=y
+CONFIG_PACKAGE_luci-app-zerotier=y
+CONFIG_PACKAGE_kmod-tun=y
+# 10 MosDNS（别与 OpenClash 抢 53 主控）
+CONFIG_PACKAGE_mosdns=y
+CONFIG_PACKAGE_luci-app-mosdns=y
+# 11 流量监控 mTools
+CONFIG_PACKAGE_net-mtools=y
+# 12 Bandix（Rust/eBPF，需关硬件卸载才统计全量；依赖 zoneinfo-all/conntrack/iw）
+CONFIG_PACKAGE_bandix=y
+CONFIG_PACKAGE_luci-app-bandix=y
+CONFIG_PACKAGE_zoneinfo-all=y
+CONFIG_PACKAGE_conntrack=y
+CONFIG_PACKAGE_iw=y
+# 13 PassWall（与 OpenClash 同装，运行时只启用一个）+ 常用节点内核
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_xray-core=y
+CONFIG_PACKAGE_sing-box=y
+CONFIG_PACKAGE_hysteria=y
+CONFIG_PACKAGE_tuic-client=y
+CONFIG_PACKAGE_chinadns-ng=y
+CONFIG_PACKAGE_tcping=y
+# OpenClash / PassWall 公共依赖
+CONFIG_PACKAGE_dnsmasq=n
+CONFIG_PACKAGE_dnsmasq-full=y
+CONFIG_PACKAGE_ca-bundle=y
+CONFIG_PACKAGE_ca-certificates=y
+CONFIG_PACKAGE_ipset=y
+CONFIG_PACKAGE_tc=y
+CONFIG_PACKAGE_kmod-sched-cake=y
+CONFIG_PACKAGE_kmod-ipt-socket=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
+CONFIG_PACKAGE_kmod-nft-socket=y
+CONFIG_PACKAGE_kmod-nft-redirect=y
+CONFIG_PACKAGE_bind-host=y
+CONFIG_PACKAGE_openssh-sftp-server=y
+# 其它代理插件互斥，只保留 OpenClash + PassWall
+CONFIG_PACKAGE_luci-app-passwall2=n
+CONFIG_PACKAGE_luci-app-homeproxy=n
+CONFIG_PACKAGE_luci-app-nikki=n
+CONFIG_PACKAGE_luci-app-momo=n
+# 主路由实用件
+CONFIG_PACKAGE_luci-app-ddns-go=y
+CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-watchcat=y
+CONFIG_PACKAGE_luci-app-autoreboot=y
+CONFIG_PACKAGE_luci-app-partexp=y
+CONFIG_PACKAGE_luci-app-mini-diskmanager=y
+CONFIG_PACKAGE_iperf3=y
+CONFIG_PACKAGE_htop=y
+CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_wget-ssl=y
+
+# ===== 清单外的大件继续关掉（512MB 内存友好；要哪个改成 y 即可） =====
 CONFIG_PACKAGE_php8=n
 CONFIG_PACKAGE_php8-cgi=n
 CONFIG_PACKAGE_php8-mod-curl=n
@@ -16,25 +92,20 @@ CONFIG_PACKAGE_luci-app-sunpanel=n
 CONFIG_PACKAGE_sunpanel=n
 CONFIG_PACKAGE_verysync=n
 CONFIG_PACKAGE_luci-app-verysync=n
-CONFIG_PACKAGE_luci-app-vlmcsd=n
 CONFIG_PACKAGE_istoreenhance=n
 CONFIG_PACKAGE_luci-app-istoreenhance=n
 CONFIG_PACKAGE_luci-app-advancedplus=n
-
-# ---------- 砍掉：Samba/Docker（512MB 内存扛不住，纯主路由不需要） ----------
 CONFIG_PACKAGE_samba4-server=n
 CONFIG_PACKAGE_luci-app-samba4=n
 CONFIG_PACKAGE_luci-app-dockerman=n
-
-# ---------- 砍掉：多余主题（默认只留 aurora，想换 argon 就反过来） ----------
+CONFIG_PACKAGE_luci-app-adguardhome=n
+CONFIG_PACKAGE_adguardhome=n
 CONFIG_PACKAGE_luci-theme-kucat=n
 CONFIG_PACKAGE_luci-app-kucat-config=n
 CONFIG_PACKAGE_luci-theme-shadcn=n
 CONFIG_PACKAGE_luci-theme-edge=n
 CONFIG_PACKAGE_luci-theme-argon=n
 CONFIG_PACKAGE_luci-app-argon-config=n
-
-# ---------- 砍掉：有线场景用不到的内核模块 ----------
 CONFIG_PACKAGE_kmod-ata-ahci=n
 CONFIG_PACKAGE_kmod-ata-core=n
 CONFIG_PACKAGE_kmod-fs-btrfs=n
@@ -43,75 +114,24 @@ CONFIG_PACKAGE_nvme-cli=n
 CONFIG_PACKAGE_libnvme=n
 CONFIG_PACKAGE_kmod-usb-audio=n
 CONFIG_PACKAGE_kmod-sound-core=n
-# 注意：USB 3.0 / xhci / usb-storage 别关，否则 U 盘和随身WiFi 都识别不了
 CONFIG_PACKAGE_luci-app-wifischedule=n
+CONFIG_PACKAGE_luci-app-msd_lite=n
 CONFIG_PACKAGE_coremark=n
 CONFIG_PACKAGE_smartmontools=n
 CONFIG_PACKAGE_smartmontools-drivedb=n
-
-# ---------- 砍掉：重复的推送 ----------
 CONFIG_PACKAGE_luci-app-pushbot=n
-
-# ---------- 保留（主路由实用）：zram / ddns / upnp / wireguard / 断网看门狗 / 定时重启 / 分区扩容 / ttyd ----------
-# 这些 GENERAL.txt 里已有，列在这里只是备忘，别改成 n
-#   zram-swap、luci-app-ddns-go、luci-app-upnp、luci-proto-wireguard+wireguard-tools、
-#   luci-app-watchcat、luci-app-autoreboot、luci-app-partexp、luci-app-ttyd、iperf3、htop、curl、openssh-sftp-server
-
-# ---------- 虚拟组网：二选一，别都装 ----------
-CONFIG_PACKAGE_luci-app-easytier=n
-CONFIG_PACKAGE_luci-app-zerotier=y
-CONFIG_PACKAGE_zerotier=y
-
-# ---------- USB 随身WiFi 做备用 WAN：只用得着这几个，其余 4G 网卡驱动砍掉 ----------
+CONFIG_PACKAGE_luci-app-oaf=n
+CONFIG_PACKAGE_luci-app-timecontrol=n
+CONFIG_PACKAGE_luci-app-vsftpd=n
+CONFIG_PACKAGE_luci-app-taskplan=n
+CONFIG_PACKAGE_luci-app-poweroff=n
+# 4G/5G 只留 qmi/rndis/mbim；kmod-usb-net 不能关（父依赖）；USB3/xhci/usb-storage 保留
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
 CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=y
 CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=n
 CONFIG_PACKAGE_kmod-usb-net-asix=n
-CONFIG_PACKAGE_kmod-usb-net-rtl8150=n
-CONFIG_PACKAGE_kmod-usb-net-rtl8152=n
-CONFIG_PACKAGE_kmod-usb-net-cdc-eem=n
-CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=n
-CONFIG_PACKAGE_kmod-usb-net-cdc-subset=n
-CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=n
-CONFIG_PACKAGE_kmod-usb-net-ipheth=n
-CONFIG_PACKAGE_kmod-usb-net-sierrawireless=n
-CONFIG_PACKAGE_kmod-usb-net-cdc-ether=n
-# kmod-usb-net 不能关：它是 qmi-wwan / rndis 的父依赖，defconfig 会强行拉回来，写 n 只会报错
 CONFIG_PACKAGE_usb-modeswitch=n
 CONFIG_PACKAGE_libimobiledevice=n
 CONFIG_PACKAGE_usmuxd=n
 CONFIG_PACKAGE_usbmuxd=n
-
-# ---------- 科学插件：只留一个（openclash / passwall2 / nikki / homeproxy 四选一） ----------
-# 注意：CI 只发布固件镜像、不发布 ipk 索引，所以插件要在编译时就选好，事后 opkg 装不到这些第三方插件
-CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-passwall=n
-CONFIG_PACKAGE_luci-app-passwall2=n
-CONFIG_PACKAGE_luci-app-homeproxy=n
-CONFIG_PACKAGE_luci-app-nikki=n
-CONFIG_PACKAGE_luci-app-momo=n
-# --- OpenClash 必需：DNS 要用 dnsmasq-full（分组/FakeIP/分流都靠它）。
-# --- 已 grep 过这个 CI 的 Settings.sh / Packages.sh / GENERAL.txt：没有任何地方处理 dnsmasq，
-# --- 所以这两行必须自己写，否则装/跑 OpenClash 会报 dnsmasq 不支持 ipset/分组。
-CONFIG_PACKAGE_dnsmasq=n
-CONFIG_PACKAGE_dnsmasq-full=y
-# OpenClash 常见依赖（证书、tc/cake 分流、ipset、连通性测试）
-CONFIG_PACKAGE_ca-bundle=y
-CONFIG_PACKAGE_ca-certificates=y
-CONFIG_PACKAGE_ipset=y
-CONFIG_PACKAGE_tc=y
-CONFIG_PACKAGE_kmod-sched-cake=y
-CONFIG_PACKAGE_kmod-ipt-socket=y
-CONFIG_PACKAGE_kmod-nft-tproxy=y
-CONFIG_PACKAGE_kmod-nft-socket=y
-CONFIG_PACKAGE_kmod-nft-redirect=y
-CONFIG_PACKAGE_bind-host=y
-CONFIG_PACKAGE_openssh-sftp-server=y
-# 上网时间控制/应用过滤/FTP/UHTTPD 这些不需要就关
-CONFIG_PACKAGE_luci-app-oaf=n
-CONFIG_PACKAGE_luci-app-timecontrol=n
-CONFIG_PACKAGE_luci-app-vsftpd=n
-CONFIG_PACKAGE_luci-app-taskplan=n
-CONFIG_PACKAGE_luci-app-wechatpush=y
-CONFIG_PACKAGE_luci-app-poweroff=n
